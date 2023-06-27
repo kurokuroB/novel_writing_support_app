@@ -1,7 +1,7 @@
 FROM python:3.9-buster
 
-WORKDIR /app
-ADD . /app
+WORKDIR /
+ADD . /
 
 # https://timesaving.hatenablog.com/entry/2022/10/03/150000
 
@@ -15,7 +15,7 @@ RUN apt-get update && apt-get clean
 RUN curl -sSL https://install.python-poetry.org/ | python -
 
 #package install
-COPY pyproject.toml poetry.lock /app/
+COPY pyproject.toml poetry.lock /
 RUN poetry install --only main
 
 ENTRYPOINT ["python", "app.py"]
