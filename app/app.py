@@ -1,46 +1,35 @@
-from flask import Flask, render_template, request
-from langchain import OpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationChain
+from flask import Flask, request
+import openai
 
 app = Flask(__name__)
+# app.config["JSON_AS_ASCII"] = False  # json出力時の、文字化けを防止
 
-#グローバル変数
-MODEL = "text-davinci-003"
 
-# 会話用のインスタンスconversationを作成
-llm = OpenAI(model_name=MODEL, max_tokens=1024) 
-conversation = ConversationChain(
-    llm=llm, verbose=False, memory=ConversationBufferMemory()
+# ルーティング
+
+
+# シンプルな小説採点
+@app.route("/evaluation", methods=["POST"])
+def evaluation():
+    """本文の講評を行う"""
+    # 定数
+
+    model = request.form.get("model", "gpt-3.5-turbo-16k")  # 特に指定なければ16k使う
+    script = request.form.get("text", "")
+
+    answer = openai.ChatCompletion.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": script},
+        ],
     )
 
-#ルーティング
-@app.route("/")
-def index():
-    return render_template("form.html", title="入力画面")
+    evaluation = answer["choices"][0]["message"]["content"]
+
+    return evaluation
 
 
-@app.route("/result", methods=["POST"])
-def write():
-    style = request.form["style"]
-    sentence = request.form["sentence"]
-    
-    # styleの記憶
-    _ = conversation("【】で囲まれた文章の文体は文体Aです。" + "【" + style + "】")
-    
-    # 返信文生成
-    response=conversation(
-        "【】で囲まれた文章に対して、文体Aで返信文を作成してください。" \
-         + "【" + sentence + "】"
-         )
-
-    # 履歴削除
-    conversation.memory.clear()
-    
-    return render_template(
-        "result.html", title="結果画面", result=response['response']
-        )
-
-#おまじない
+# おまじない
 if __name__ == "__main__":
-    app.run(port=8080, host='0.0.0.0') #host='0.0.0.0'で外部公開を行う
+    app.run(port=8080, host="0.0.0.0")  # host='0.0.0.0'で外部公開を行う

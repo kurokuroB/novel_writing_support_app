@@ -1,10 +1,21 @@
-FROM python:3.10-buster
+FROM python:3.9-buster
 
 WORKDIR /app
 ADD . /app
 
+# https://timesaving.hatenablog.com/entry/2022/10/03/150000
+
+ENV POETRY_HOME="/opt/poetry" \
+    # 以下設定で、コンテナ上に直接パッケージをインストールするようにする。
+    POETRY_VIRTUALENVS_CREATE=false 
+
+ENV PATH="$POETRY_HOME/bin:$PATH"
+
 RUN apt-get update && apt-get clean
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN curl -sSL https://install.python-poetry.org/ | python -
+
+#package install
+COPY pyproject.toml poetry.lock /app/
+RUN poetry install --only main
 
 ENTRYPOINT ["python", "app.py"]
