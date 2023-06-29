@@ -8,26 +8,24 @@ app = Flask(__name__)
 # ルーティング
 
 
-# シンプルな小説採点
-@app.route("/evaluation", methods=["POST"])
-def evaluation():
-    """本文の講評を行う"""
-    # 定数
+@app.route("/chat", methods=["POST"])
+def chat():
+    """chatgptとのchatを行う。"""
 
     model = request.form.get("model", "gpt-3.5-turbo-16k")  # 特に指定なければ16k使う
-    script = request.form.get("text", "")
+    text = request.form.get("text", "")
 
-    answer = openai.ChatCompletion.create(
+    response = openai.ChatCompletion.create(
         model=model,
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": script},
+            {"role": "user", "content": text},
         ],
     )
 
-    evaluation = answer["choices"][0]["message"]["content"]
+    content = response["choices"][0]["message"]["content"]
 
-    return evaluation
+    return content
 
 
 # おまじない
