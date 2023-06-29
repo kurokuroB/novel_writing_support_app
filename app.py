@@ -1,9 +1,15 @@
 from flask import Flask, request
 import openai
+from gensim.models.doc2vec import Doc2Vec
+from janome.tokenizer import Tokenizer
+import numpy as np
+
 
 app = Flask(__name__)
-# app.config["JSON_AS_ASCII"] = False  # json出力時の、文字化けを防止
+app.config["JSON_AS_ASCII"] = False  # json出力時の、文字化けを防止
 
+doc2vec = Doc2Vec.load("./model/doc2vec")
+tokenizer = Tokenizer()
 
 # ルーティング
 
@@ -26,6 +32,25 @@ def chat():
     content = response["choices"][0]["message"]["content"]
 
     return content
+
+
+# アイデアの新規性を確認（beta)
+@app.route("/check_novelty", methods=["POST"])
+def check_novelty():
+    text = request.form.get("text", "")
+    wakati = list(tokenizer.tokenize(text, wakati=True))
+    wakati_vector = doc2vec.infer_vector(wakati)
+
+    # https://radimrehurek.com/gensim/models/keyedvectors.html
+    # 10個の類似小説を取り出す
+    most_similars = doc2vec.docvecs.most_similar(wakati_vector, topn=10)
+
+    similaritys = []
+    for idx, similarity in most_similars:
+        similaritys.append(similarity)
+    mean_similarity = np.mean(similaritys)
+
+    return f"過去作類似度:{mean_similarity}"
 
 
 # おまじない
