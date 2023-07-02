@@ -14,7 +14,8 @@ tokenizer = Tokenizer()
 # ルーティング
 
 
-@app.route("/chat", methods=["POST"])
+# api機能
+@app.route("/api/chat", methods=["POST"])
 def chat():
     """chatgptとのchatを行う。"""
 
@@ -35,7 +36,7 @@ def chat():
 
 
 # アイデアの新規性を確認（beta)
-@app.route("/check_novelty", methods=["POST"])
+@app.route("/api/check_novelty", methods=["POST"])
 def check_novelty():
     text = request.form.get("text", "")
     wakati = list(tokenizer.tokenize(text, wakati=True))
