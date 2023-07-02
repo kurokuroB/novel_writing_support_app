@@ -4,17 +4,14 @@
 
 簡易的な執筆支援アプリ
 
-## エンドポイント
+## 使用方法
 
-- チャット用  
-  https://novel-writing-support-app-hzmhfp5tya-uc.a.run.app/chat
+[wiki](https://github.com/kurokuroB/novel_writing_support_app/wiki)をご参照ください。
 
-  - コマンド  
-    `curl -X POST -d "model=gpt-3.5-turbo-16k&text=10000字程度の短編評価も可能" https://novel-writing-support-app-hzmhfp5tya-uc.a.run.app/chat`
+## 使用技術
 
-- 新規性確認用（beta）  
-  https://novel-writing-support-app-hzmhfp5tya-uc.a.run.app/check_novelty
-
-  - コマンド
-
-    `curl -X POST -d "text=あらすじ" https://novel-writing-support-app-hzmhfp5tya-uc.a.run.app/check_novelty`
+- 言語：Python3
+- フレームワーク：Flask
+- インフラ：docker+poetry
+- CI/CD：Cloud build
+- デプロイ：Cloud run
