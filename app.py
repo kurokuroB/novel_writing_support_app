@@ -14,10 +14,13 @@ tokenizer = Tokenizer()
 # ルーティング
 
 
-# api機能
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    """chatgptとのchatを行う。"""
+    """chatgpt apiとのチャットを実行
+
+    Returns:
+        text: cahtgptの回答
+    """
 
     model = request.form.get("model", "gpt-3.5-turbo-16k")  # 特に指定なければ16k使う
     text = request.form.get("text", "")
@@ -35,9 +38,13 @@ def chat():
     return content
 
 
-# アイデアの新規性を確認（beta)
 @app.route("/api/check_novelty", methods=["POST"])
 def check_novelty():
+    """アイデアの新規性確認(beta)
+
+    Returns:
+        text: 過去作類似度を提示。類似度はコサイン類似度。
+    """
     text = request.form.get("text", "")
     wakati = list(tokenizer.tokenize(text, wakati=True))
     wakati_vector = doc2vec.infer_vector(wakati)
