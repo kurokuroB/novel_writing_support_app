@@ -1,0 +1,219 @@
+{
+  "pipelineSpec": {
+    "components": {
+      "comp-add-op": {
+        "executorLabel": "exec-add-op",
+        "inputDefinitions": {
+          "parameters": {
+            "a": {
+              "type": "INT"
+            },
+            "b": {
+              "type": "INT"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "INT"
+            }
+          }
+        }
+      },
+      "comp-mul-op": {
+        "executorLabel": "exec-mul-op",
+        "inputDefinitions": {
+          "parameters": {
+            "a": {
+              "type": "INT"
+            },
+            "b": {
+              "type": "INT"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "INT"
+            }
+          }
+        }
+      },
+      "comp-print-op": {
+        "executorLabel": "exec-print-op",
+        "inputDefinitions": {
+          "parameters": {
+            "a": {
+              "type": "INT"
+            }
+          }
+        }
+      }
+    },
+    "deploymentSpec": {
+      "executors": {
+        "exec-add-op": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "add_op"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "(python3 -m ensurepip || python3 -m ensurepip --user) && (PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet                 --no-warn-script-location 'kfp==1.8.0' || PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet                 --no-warn-script-location 'kfp==1.8.0' --user) && \"$0\" \"$@\"",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef add_op(a: int, b: int) -> int:\n    return a + b\n\n"
+            ],
+            "image": "python:3.8"
+          }
+        },
+        "exec-mul-op": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "mul_op"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "(python3 -m ensurepip || python3 -m ensurepip --user) && (PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet                 --no-warn-script-location 'kfp==1.8.0' || PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet                 --no-warn-script-location 'kfp==1.8.0' --user) && \"$0\" \"$@\"",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef mul_op(a: int, b: int) -> int:\n    return a * b\n\n"
+            ],
+            "image": "python:3.8"
+          }
+        },
+        "exec-print-op": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "print_op"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "(python3 -m ensurepip || python3 -m ensurepip --user) && (PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet                 --no-warn-script-location 'kfp==1.8.0' || PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet                 --no-warn-script-location 'kfp==1.8.0' --user) && \"$0\" \"$@\"",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef print_op(a: int):\n    print(\"result = {}\".format(a))\n\n"
+            ],
+            "image": "python:3.8"
+          }
+        }
+      }
+    },
+    "pipelineInfo": {
+      "name": "dependancy-check"
+    },
+    "root": {
+      "dag": {
+        "tasks": {
+          "add-op": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-add-op"
+            },
+            "inputs": {
+              "parameters": {
+                "a": {
+                  "componentInputParameter": "a"
+                },
+                "b": {
+                  "componentInputParameter": "b"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "add-op"
+            }
+          },
+          "mul-op": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-mul-op"
+            },
+            "dependentTasks": [
+              "add-op"
+            ],
+            "inputs": {
+              "parameters": {
+                "a": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "add-op"
+                  }
+                },
+                "b": {
+                  "componentInputParameter": "c"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "mul-op"
+            }
+          },
+          "print-op": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-print-op"
+            },
+            "dependentTasks": [
+              "mul-op"
+            ],
+            "inputs": {
+              "parameters": {
+                "a": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "mul-op"
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "print-op"
+            }
+          }
+        }
+      },
+      "inputDefinitions": {
+        "parameters": {
+          "a": {
+            "type": "INT"
+          },
+          "b": {
+            "type": "INT"
+          },
+          "c": {
+            "type": "INT"
+          }
+        }
+      }
+    },
+    "schemaVersion": "2.0.0",
+    "sdkVersion": "kfp-1.8.0"
+  },
+  "runtimeConfig": {
+    "gcsOutputDirectory": "gs://vertex_pipeline_sbert"
+  }
+}
